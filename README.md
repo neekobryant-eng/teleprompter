@@ -4,7 +4,7 @@ A teleprompter web app for the Galaxy Tab S7. Plain HTML, CSS and JavaScript wit
 
 **Live at https://neekobryant-eng.github.io/teleprompter/**
 
-**Status:** Phase 1 (core prompter) and Phase 2 (install and offline) are built and published to GitHub Pages.
+**Status:** Phase 1 (core prompter) and Phase 2 (install and offline) are built and published to GitHub Pages. Phase 2 is tested on the tablet. Next: Phase 3.
 
 ## Run it
 
@@ -120,4 +120,4 @@ Speed is a percentage of 140 words per minute. The app measures how much screen 
 ## Phase 2 checklist (run on the tablet)
 
 - [x] App installs to the home screen and opens full screen (Nov 4, from the GitHub Pages address: no status bar, address bar or navigation bar; the overlay's full-screen button is hidden because it isn't needed)
-- [ ] With Wi-Fi off, the app opens and every script plays (checked Nov 4 on localhost with the server stopped, and on the GitHub Pages copy with the page's network cut: both opened from the saved copy and played. Still to do: the installed app with Wi-Fi actually off)
+- [x] With Wi-Fi off, the app opens and every script plays (Nov 4: installed app, Wi-Fi off, closed and reopened from the home screen; it opened and the script played)
