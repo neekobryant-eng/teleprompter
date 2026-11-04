@@ -119,5 +119,5 @@ Speed is a percentage of 140 words per minute. The app measures how much screen 
 
 ## Phase 2 checklist (run on the tablet)
 
-- [ ] App installs to the home screen and opens full screen
-- [ ] With Wi-Fi off, the app opens and every script plays (checked Nov 4 on localhost with the server stopped: opened from the saved copy and both scripts played; repeat on the GitHub Pages copy)
+- [x] App installs to the home screen and opens full screen (Nov 4, from the GitHub Pages address: no status bar, address bar or navigation bar; the overlay's full-screen button is hidden because it isn't needed)
+- [ ] With Wi-Fi off, the app opens and every script plays (checked Nov 4 on localhost with the server stopped, and on the GitHub Pages copy with the page's network cut: both opened from the saved copy and played. Still to do: the installed app with Wi-Fi actually off)
