@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <meta name="theme-color" content="#0f1115">
+  <title>Teleprompter</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <noscript>This teleprompter needs JavaScript turned on.</noscript>
+
+  <!-- ===================== Library ===================== -->
+  <section id="view-library" class="view" hidden>
+    <header class="topbar">
+      <h1 class="brand">Teleprompter</h1>
+      <div class="topbar-actions">
+        <button type="button" class="btn update" id="lib-update" hidden>Update ready · Reload</button>
+        <button type="button" class="btn" id="lib-install" hidden>Install app</button>
+        <button type="button" class="btn primary" id="lib-new">+ New script</button>
+        <button type="button" class="btn" id="lib-paste">Paste as new</button>
+        <button type="button" class="btn" id="lib-import">Import .txt / .md</button>
+      </div>
+    </header>
+
+    <main class="lib-list" id="lib-list"></main>
+    <div class="empty" id="lib-empty" hidden>
+      <p>No scripts yet.</p>
+      <p>Tap <strong>New script</strong> and paste your text, or import a .txt or .md file.</p>
+    </div>
+
+    <footer class="lib-footer">
+      <span id="lib-count"></span>
+      <span class="lib-footer-actions">
+        <button type="button" class="btn small" id="lib-backup">Back up all scripts</button>
+        <button type="button" class="btn small" id="lib-restore">Restore from backup</button>
+      </span>
+      <span class="muted">Scripts are stored only on this device.<span id="lib-offline"></span></span>
+    </footer>
+
+    <input type="file" id="file-import" accept=".txt,.md,.markdown,text/plain,text/markdown" multiple hidden>
+    <input type="file" id="file-restore" accept=".json,application/json" hidden>
+  </section>
+
+  <!-- ===================== Editor ===================== -->
+  <section id="view-editor" class="view" hidden>
+    <header class="topbar">
+      <button type="button" class="btn icon" id="ed-back" aria-label="Back to library">←</button>
+      <input type="text" class="title-input" id="ed-title" placeholder="Title" autocomplete="off" enterkeyhint="next">
+      <span class="status" id="ed-status" aria-live="polite"></span>
+      <button type="button" class="btn primary" id="ed-play">▶ Play</button>
+    </header>
+    <textarea id="ed-body" spellcheck="true" placeholder="Paste or type your script here.
+
+## Section name   starts a section
+// a note          hidden on the prompter
+(blank line)       new paragraph"></textarea>
+    <footer class="ed-footer">
+      <span id="ed-count"></span>
+      <span class="muted">## Section · // hidden note · blank line = new paragraph</span>
+    </footer>
+  </section>
+
+  <!-- ===================== Prompter ===================== -->
+  <section id="view-prompter" class="view" hidden>
+    <!-- The stage takes gestures in physical screen coordinates. -->
+    <div class="pr-stage theme-dark" id="pr-stage">
+      <!-- Everything inside the mirror wrapper is flipped for the glass rig. -->
+      <div class="pr-mirror" id="pr-mirror">
+        <div class="pr-track" id="pr-track"></div>
+        <div class="pr-dim" aria-hidden="true"></div>
+        <div class="pr-line" aria-hidden="true"></div>
+        <div class="pr-countdown" id="pr-countdown" hidden></div>
+        <div class="pr-hint" id="pr-hint" role="status"></div>
+      </div>
+    </div>
+
+    <!-- Controls overlay: long press or Esc. Not mirrored (you look at the tablet to use it). -->
+    <div class="pr-overlay" id="pr-overlay" hidden>
+      <div class="ov-backdrop" id="ov-backdrop"></div>
+      <div class="ov-sheet" role="dialog" aria-label="Prompter controls">
+        <div class="ov-head">
+          <div class="ov-title"><strong id="ov-title"></strong> <span class="muted" id="ov-progress"></span></div>
+          <button type="button" class="btn icon" id="ov-close" aria-label="Close controls">✕</button>
+        </div>
+
+        <div class="ov-actions">
+          <button type="button" class="btn primary" id="ov-play">▶ Play</button>
+          <button type="button" class="btn" id="ov-restart">⟲ Restart</button>
+          <button type="button" class="btn" id="ov-fs">Full screen</button>
+          <button type="button" class="btn" id="ov-edit">Edit script</button>
+          <button type="button" class="btn" id="ov-exit">Exit</button>
+        </div>
+
+        <div class="ov-grid">
+          <div class="ov-field">
+            <span class="ov-label">Speed</span>
+            <div class="stepper">
+              <button type="button" class="btn" id="ov-slower" aria-label="Slower">−</button>
+              <output id="ov-speed"></output>
+              <button type="button" class="btn" id="ov-faster" aria-label="Faster">+</button>
+            </div>
+          </div>
+          <label class="ov-field">
+            <span class="ov-label">Font size <output data-out="fontSize"></output></span>
+            <input type="range" data-setting="fontSize">
+          </label>
+          <label class="ov-field">
+            <span class="ov-label">Line spacing <output data-out="lineHeight"></output></span>
+            <input type="range" data-setting="lineHeight">
+          </label>
+          <label class="ov-field">
+            <span class="ov-label">Side margins <output data-out="margin"></output></span>
+            <input type="range" data-setting="margin">
+          </label>
+          <label class="ov-field">
+            <span class="ov-label">Reading line <output data-out="readingLine"></output></span>
+            <input type="range" data-setting="readingLine">
+          </label>
+          <div class="ov-field">
+            <span class="ov-label">Mode</span>
+            <div class="seg" data-setting="mode">
+              <button type="button" data-value="full">Full screen</button>
+              <button type="button" data-value="rig">Glass rig</button>
+            </div>
+          </div>
+          <div class="ov-field">
+            <span class="ov-label">Theme</span>
+            <div class="seg" data-setting="theme">
+              <button type="button" data-value="dark">Dark</button>
+              <button type="button" data-value="light">Light</button>
+              <button type="button" data-value="contrast">High contrast</button>
+            </div>
+          </div>
+          <div class="ov-field ov-switches">
+            <label class="switch"><input type="checkbox" data-setting="mirrorH"><span class="switch-ui"></span>Mirror left–right</label>
+            <label class="switch"><input type="checkbox" data-setting="mirrorV"><span class="switch-ui"></span>Flip upside down</label>
+            <label class="switch"><input type="checkbox" data-setting="countdown"><span class="switch-ui"></span>3-2-1 countdown</label>
+          </div>
+        </div>
+
+        <div class="ov-field ov-sections-wrap" id="ov-sections-wrap">
+          <span class="ov-label">Jump to section</span>
+          <div class="ov-sections" id="ov-sections"></div>
+        </div>
+
+        <details class="ov-help">
+          <summary>Gestures</summary>
+          <table>
+            <thead><tr><th>Gesture</th><th>Action</th><th>Key</th></tr></thead>
+            <tbody>
+              <tr><td>Tap middle</td><td>Play / pause</td><td>Space</td></tr>
+              <tr><td>Tap right third</td><td>Faster (5%)</td><td>→</td></tr>
+              <tr><td>Tap left third</td><td>Slower (5%)</td><td>←</td></tr>
+              <tr><td>Swipe up / down</td><td>Move text forward / back</td><td>↓ / ↑</td></tr>
+              <tr><td>Two-finger swipe left / right</td><td>Next / previous section</td><td>Page Down / Up</td></tr>
+              <tr><td>Long press</td><td>These controls</td><td>Esc</td></tr>
+              <tr><td>Double-tap middle</td><td>Restart from the top</td><td>Home</td></tr>
+            </tbody>
+          </table>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <dialog id="dlg"></dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

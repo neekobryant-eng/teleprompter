@@ -1,0 +1,6 @@
+# The spec stays on this laptop: the repository is public and the spec lists the tablet's
+# serial number and local folder paths.
+SPEC.md
+
+# Local tool settings
+.claude/settings.local.json
